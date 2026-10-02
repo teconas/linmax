@@ -1,0 +1,32 @@
+#!/bin/sh
+# Installiert die Pakete aus .chezmoidata/packages.yaml.
+# Läuft dank run_onchange_ nur erneut, wenn sich die Paketliste ändert.
+set -eu
+
+[ "$(id -u)" -eq 0 ] && sudo="" || sudo="sudo"
+
+if command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    install="apt-get install -y -qq"
+    # Charm-Repo: liefert glow, das in Debian/Ubuntu stable fehlt.
+    if [ ! -f /etc/apt/keyrings/charm.gpg ]; then
+        $sudo apt-get update -qq
+        $sudo $install curl gpg
+        $sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://repo.charm.sh/apt/gpg.key | $sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" \
+            | $sudo tee /etc/apt/sources.list.d/charm.list >/dev/null
+    fi
+    $sudo apt-get update -qq
+elif command -v dnf >/dev/null 2>&1; then
+    install="dnf install -y -q"
+elif command -v pacman >/dev/null 2>&1; then
+    install="pacman -S --noconfirm --needed"
+else
+    echo "kein unterstützter Paketmanager gefunden" >&2
+    exit 1
+fi
+
+for pkg in {{ .packages.common | join " " }}; do
+    $sudo $install "$pkg" || echo "übersprungen (nicht im Repo): $pkg" >&2
+done

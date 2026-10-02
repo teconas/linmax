@@ -1,0 +1,10 @@
+#!/bin/sh
+# Hängt den ~/.bashrc.d/-Loader an die bestehende .bashrc an - idempotent,
+# der restliche Inhalt bleibt unangetastet.
+content=$(cat)
+printf '%s\n' "$content"
+
+case "$content" in
+    *.bashrc.d*) ;;
+    *) printf '\n%s\n' 'for f in ~/.bashrc.d/*.sh; do [ -r "$f" ] && . "$f"; done' ;;
+esac

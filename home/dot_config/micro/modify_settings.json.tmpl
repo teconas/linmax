@@ -1,0 +1,6 @@
+{{- $settings := dict -}}
+{{- if .chezmoi.stdin -}}
+{{-   $settings = .chezmoi.stdin | fromJson -}}
+{{- end -}}
+{{- $_ := set $settings "clipboard" "terminal" -}}
+{{ $settings | toPrettyJson }}

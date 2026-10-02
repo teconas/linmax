@@ -1,0 +1,7 @@
+# Editor- und OS-Müll
+*.swp
+*~
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
