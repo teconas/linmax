@@ -23,3 +23,12 @@ if command -v wslpath >/dev/null 2>&1; then
         cd "$(wslpath -u "$*")" || return 1
     }
 fi
+
+# Reruns the last command with sudo
+#srd = sudo redo
+srd() {
+    local cmd
+    cmd="sudo $(history -p '!!')"
+    read -rp "$cmd"$'\n'"[Press Enter to confirm]"
+    eval "$cmd"
+}
